@@ -4,7 +4,6 @@ from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
 from datetime import datetime
 import time
-import json
 
 # ===========================
 # 1. CONFIGURACIÓN Y CONSTANTES
@@ -18,38 +17,25 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Cargar credenciales desde Secrets o archivo local
+# Cargar credenciales desde Secrets
 def cargar_configuracion():
-    """Carga configuración desde Secrets o archivo local para desarrollo."""
+    """Carga configuración desde Secrets."""
     try:
-        # Intentar cargar desde Streamlit Secrets
         if hasattr(st, 'secrets'):
             USERS = dict(st.secrets["users"])
-            CREDENTIALS_JSON = json.loads(st.secrets["google_sheets"]["credenciales_json"])
-            return USERS, CREDENTIALS_JSON
+            GOOGLE_CREDS = dict(st.secrets["google_sheets"])
+            return USERS, GOOGLE_CREDS
         else:
-            # Fallback para desarrollo local
-            import os
-            if os.path.exists("credenciales.json"):
-                with open("credenciales.json", "r") as f:
-                    CREDENTIALS_JSON = json.load(f)
-                # Usuarios por defecto para desarrollo
-                USERS = {
-                    "admin": "admin123",
-                    "usuario1": "pass123",
-                    "usuario2": "pass456"
-                }
-                return USERS, CREDENTIALS_JSON
-            else:
-                st.error("No se encontraron credenciales configuradas")
-                return None, None
+            # Para desarrollo local, puedes crear un archivo secrets.toml en carpeta .streamlit
+            st.error("No se encontraron secrets configurados")
+            return None, None
     except Exception as e:
         st.error(f"Error cargando configuración: {e}")
         return None, None
 
 # Cargar configuración
-USERS, CREDENTIALS_JSON = cargar_configuracion()
-if USERS is None:
+USERS, GOOGLE_CREDS = cargar_configuracion()
+if USERS is None or GOOGLE_CREDS is None:
     st.stop()
 
 # Constantes de Negocio
@@ -125,8 +111,8 @@ def conectar_google_sheets():
             "https://www.googleapis.com/auth/drive"
         ]
         
-        # Usar credenciales desde Secrets
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(CREDENTIALS_JSON, scope)
+        # Usar credenciales desde Secrets (ya es un diccionario)
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(GOOGLE_CREDS, scope)
         client = gspread.authorize(creds)
         
         # Intentar abrir la hoja para validar conexión
