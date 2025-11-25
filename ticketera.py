@@ -51,8 +51,8 @@ MOTIVOS_POR_ORIGEN = {
         "Configuracion",
         "Facilidades de clase",
         "Reconfiguración",
-        "Desviación de llamadas"], # La lista base tal cual
-    "WhatsApp": MOTIVOS_COMUNES_BASE + ["Cambio de facilidades"], # Base + extra
+        "Desviación de llamadas","Otros"], # La lista base tal cual
+    "WhatsApp": MOTIVOS_COMUNES_BASE + ["Cambio de facilidades","Otros"], # Base + extra
     "Troubleticket": MOTIVOS_COMUNES_BASE, # La lista base tal cual
     "Gestel": [
         "Portabilidad",
@@ -67,7 +67,8 @@ MOTIVOS_POR_ORIGEN = {
         "Configuracion",
         "Facilidades de clase",
         "Reconfiguración",
-        "Desviación de llamadas"
+        "Desviación de llamadas",
+        "Otros"
     ]
 }
 
