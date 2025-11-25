@@ -39,7 +39,7 @@ MOTIVOS_COMUNES_BASE = [
 
 # Diccionario que mapea cada Origen con sus Soluciones específicas
 MOTIVOS_POR_ORIGEN = {
-    "Correo": MOTIVOS_COMUNES_BASE, # La lista base tal cual
+    "Correo": MOTIVOS_COMUNES_BASE+ ["Cambio de facilidades"], # La lista base tal cual
     "WhatsApp": MOTIVOS_COMUNES_BASE + ["Cambio de facilidades"], # Base + extra
     "Troubleticket": MOTIVOS_COMUNES_BASE, # La lista base tal cual
     "Gestel": [
