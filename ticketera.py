@@ -2,7 +2,7 @@ import streamlit as st
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import time
 
 # ===========================
@@ -15,6 +15,13 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# --- FUNCIÓN PARA OBTENER HORA DE PERÚ ---
+def obtener_hora_peru():
+    """Obtiene la hora actual en zona horaria de Perú (GMT-5)"""
+    # Zona horaria de Perú (GMT-5)
+    tz_peru = timezone(timedelta(hours=-5))
+    return datetime.now(tz_peru).strftime("%Y-%m-%d %H:%M:%S")
 
 # --- DEFINICIÓN DE LISTAS Y DICCIONARIOS SEGÚN REQUERIMIENTO ---
 
@@ -39,7 +46,7 @@ MOTIVOS_COMUNES_BASE = [
 
 # Diccionario que mapea cada Origen con sus Soluciones específicas
 MOTIVOS_POR_ORIGEN = {
-    "Correo": MOTIVOS_COMUNES_BASE+ ["Cambio de facilidades","Portabilidad",
+    "Correo": MOTIVOS_COMUNES_BASE + ["Cambio de facilidades","Portabilidad",
         "Migraciones",
         "Cambio de Velocidades",
         "Baja total",
@@ -51,9 +58,9 @@ MOTIVOS_POR_ORIGEN = {
         "Configuracion",
         "Facilidades de clase",
         "Reconfiguración",
-        "Desviación de llamadas","Otros"], # La lista base tal cual
-    "WhatsApp": MOTIVOS_COMUNES_BASE + ["Cambio de facilidades","Otros"], # Base + extra
-    "Troubleticket": MOTIVOS_COMUNES_BASE, # La lista base tal cual
+        "Desviación de llamadas","Otros"],
+    "WhatsApp": MOTIVOS_COMUNES_BASE + ["Cambio de facilidades","Otros"],
+    "Troubleticket": MOTIVOS_COMUNES_BASE,
     "Gestel": [
         "Portabilidad",
         "Migraciones",
@@ -111,14 +118,15 @@ def inicializar_session_state():
             st.session_state[key] = value
 
 def resetear_formulario():
-    st.session_state['form_start_time'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    # Usar hora de Perú
+    st.session_state['form_start_time'] = obtener_hora_peru()
     st.session_state['form_reset_counter'] += 1
 
 def cambiar_pagina(pagina):
     st.session_state['current_page'] = pagina
     if pagina == 'formulario':
         if not st.session_state.get('form_start_time'):
-            st.session_state['form_start_time'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            st.session_state['form_start_time'] = obtener_hora_peru()
     st.rerun()
 
 # ===========================
@@ -249,11 +257,11 @@ def pagina_formulario():
     if not sheet: return
 
     usuario = st.session_state['user']
-    fecha_inicio = st.session_state.get('form_start_time', datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    fecha_inicio = st.session_state.get('form_start_time', obtener_hora_peru())
     counter = st.session_state['form_reset_counter']
 
     # Info visual
-    st.info(f"Usuario: **{usuario}** | Hora Inicio: **{fecha_inicio}**")
+    st.info(f"Usuario: **{usuario}** | Hora Inicio: **{fecha_inicio}** (Hora Perú)")
     st.markdown("---")
 
     # 1. SELECCIÓN DE ORIGEN
@@ -336,7 +344,8 @@ def pagina_formulario():
             if errores:
                 for e in errores: st.error(f"⚠️ {e}")
             else:
-                fecha_cierre = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                # Usar hora de Perú para la fecha de cierre también
+                fecha_cierre = obtener_hora_peru()
                 
                 # Preparamos la fila. 
                 # Estructura asume: [Usuario, F.Inicio, F.Cierre, Origen, REFERENCIA(EXTRA), Motivo, Detalles]
